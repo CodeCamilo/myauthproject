@@ -43,9 +43,8 @@ fun App() {
         "home" -> HomeScreen(
             viewModel = productViewModel,
             onNavigateToAdd = {
-                // Aquí podrías cambiar a una pantalla de "Agregar Producto"
-                // Por ahora, podrías imprimir un log o navegar si tuvieras la pantalla
-                println("Navegar a agregar producto")
+                // CAMBIO: Actualizamos la variable de estado para navegar
+                screen = "add_product"
             },
             onLogout = { screen = "login" }
         )
