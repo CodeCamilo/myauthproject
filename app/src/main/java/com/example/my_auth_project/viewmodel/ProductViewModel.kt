@@ -41,8 +41,7 @@ class ProductViewModel : ViewModel() {
     fun fetchCategorias() {
         viewModelScope.launch {
             try {
-                // Importante: Usar "Categorias" exactamente como está en tu esquema
-                val res = client.from("Categorias").select().decodeList<Categoria>()
+                val res = SupabaseManager.client.from("categorias").select().decodeList<Categoria>()
 
                 categorias.clear()
                 categorias.addAll(res)

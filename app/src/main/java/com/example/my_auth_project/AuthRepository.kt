@@ -12,9 +12,10 @@ class AuthRepository {
             this.email = email
             this.password = password
 
-            // Gracias a la librería de serialización ahora puedes hacer esto:
-            this.data = buildJsonObject {
-                put("nombre", nombre)
+            data = buildJsonObject {
+                put("display_name", nombre)
+                put("full_name", nombre)
+                put("nombre",nombre)
             }
         }
     }
