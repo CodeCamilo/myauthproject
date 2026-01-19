@@ -16,12 +16,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.my_auth_project.viewmodel.ProductViewModel
+import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(viewModel: ProductViewModel, onNavigateToAdd: () -> Unit, onLogout: () -> Unit) {
     val scope = rememberCoroutineScope()
+    // Instanciamos el repositorio para el logout
     val repository = remember { AuthRepository() }
+    val user = remember { SupabaseManager.client.auth.currentUserOrNull() }
+
+    // Corregido: Ahora la llave se cierra correctamente después de calcular el nombre
+    val nombreUsuario = remember(user) {
+        val metadata = user?.userMetadata
+        val rawName = metadata?.get("nombre")
+            ?: metadata?.get("display_name")
+            ?: metadata?.get("full_name")
+
+        rawName?.toString()?.trim('"') ?: "Usuario"
+    } // <--- ESTA LLAVE FALTABA
 
     LaunchedEffect(Unit) {
         viewModel.fetchCategorias()
@@ -30,24 +43,36 @@ fun HomeScreen(viewModel: ProductViewModel, onNavigateToAdd: () -> Unit, onLogou
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToAdd) { Icon(Icons.Default.Add, "Añadir") }
+            FloatingActionButton(onClick = onNavigateToAdd) {
+                Icon(Icons.Default.Add, contentDescription = "Añadir")
+            }
         }
     ) { padding ->
         Column(Modifier.padding(padding).padding(16.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text("Mis Productos", style = MaterialTheme.typography.headlineMedium)
-                IconButton(onClick = { scope.launch { repository.logout(); onLogout() } }) {
+                IconButton(onClick = {
+                    scope.launch {
+                        repository.logout()
+                        onLogout()
+                    }
+                }) {
                     Icon(Icons.AutoMirrored.Filled.ExitToApp, "Logout")
                 }
             }
 
+            Spacer(modifier = Modifier.height(8.dp))
+
             // Chips de Filtro
-            LazyRow {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 item {
-                    FilterChip(selected = true, onClick = { viewModel.fetchProductos() }, label = { Text("Todos") })
+                    FilterChip(
+                        selected = true,
+                        onClick = { viewModel.fetchProductos() },
+                        label = { Text("Todos") }
+                    )
                 }
-                // Añadimos el tipo Categoria aquí:
-                items(viewModel.categorias) { cat: Categoria ->
+                items(viewModel.categorias) { cat ->
                     FilterChip(
                         selected = false,
                         onClick = { viewModel.fetchProductos(cat.id) },
@@ -56,7 +81,9 @@ fun HomeScreen(viewModel: ProductViewModel, onNavigateToAdd: () -> Unit, onLogou
                 }
             }
 
-            LazyColumn {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(viewModel.productos) { prod ->
                     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                         Column(modifier = Modifier.padding(16.dp)) {
@@ -65,15 +92,15 @@ fun HomeScreen(viewModel: ProductViewModel, onNavigateToAdd: () -> Unit, onLogou
                                 Text(text = "${prod.precio}€", color = MaterialTheme.colorScheme.secondary)
                             }
 
-                            // Mostrar Categoría (JOIN)
+                            // Mostrar Categoría (Asegúrate que en el Modelo sea 'categorias')
                             Text(
-                                text = "Categoría: ${prod.Categorias?.nombre ?: "Sin categoría"}",
+                                text = "Categoría: ${prod.categorias?.nombre ?: "Sin categoria"}",
                                 style = MaterialTheme.typography.bodyMedium
                             )
 
-                            // Mostrar Usuario Creador (JOIN con la tabla profiles)
+                            // Mostrar Usuario de la sesión
                             Text(
-                                text = "Creado por: ${prod.profiles?.nombre ?: "Cargando..."}",
+                                text = "Sesión activa: $nombreUsuario",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary
                             )

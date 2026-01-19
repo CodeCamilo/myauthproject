@@ -27,6 +27,6 @@ data class Producto(
     val user_id: String,
     // Relaciones (JOINs)
     // El nombre de la variable debe ser IGUAL al nombre de la tabla en tu imagen
-    val Categorias: Categoria? = null,
+    val categorias: Categoria? = null,
     val profiles: Profile? = null
 )

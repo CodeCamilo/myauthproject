@@ -56,7 +56,8 @@ class ProductViewModel : ViewModel() {
             try {
                 // CORRECCIÓN CLAVE:
                 // Configuramos la consulta DENTRO del select
-                val res = client.from("productos").select(Columns.raw("*, categorias(*), profiles(*)")) {
+                val res = SupabaseManager.client.from("productos").select(
+                    columns = Columns.raw("*, categorias(*)")) {
 
                     // Aquí dentro estamos construyendo la consulta antes de enviarla
                     if (categoriaId != null) {
