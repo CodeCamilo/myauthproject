@@ -100,7 +100,7 @@ fun HomeScreen(viewModel: ProductViewModel, onNavigateToAdd: () -> Unit, onLogou
 
                             // Mostrar Usuario de la sesión
                             Text(
-                                text = "Sesión activa: $nombreUsuario",
+                                text = "Creado por: $nombreUsuario",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
